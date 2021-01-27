@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/home/sbao/miniconda3/envs/geocat/bin/python
 import os,shutil,glob,sys,argparse
 import tarfile
 from subprocess import Popen, PIPE
