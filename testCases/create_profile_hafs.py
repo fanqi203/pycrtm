@@ -18,13 +18,15 @@ from datetime import datetime, timedelta
 
 f1="/Users/sbao/PycharmProjects/nggps_py/pycrtm/gfs.t06z.pgrb2.0p25.f120"
 f1="/Users/sbao/PycharmProjects/nggps_py/pycrtm/gfs.t00z.pgrb2.0p25.f000.2019"
+f1="gfs.t00z.pgrb2.0p25.f000.2019"
+f1="tar/hwrf.dorian05l.2019090218.hafsprs.synoptic.0p03.f003.grb2"
+outputfile="profile_dorian_2019090218_f003_hwrf.nc"
 
-fobs="/Users/sbao/PycharmProjects/nggps_py/gfsv15_total_add_on.zarr"
-fobs="obs_grid.nc"
-f1="tar/gfs.t18z.pgrb2.0p25.f003"
+#fobs="/Users/sbao/PycharmProjects/nggps_py/gfsv15_total_add_on.zarr"
+#hwrf.dorian05l.2019090218.hafsprs.synoptic.0p03.f003.grb2
 
 n_clouds=5
-n_aerosol=1
+n_aerosol=0
 
 def angle_2d(lat,lon,y,m,d,h):
 # given surface lat lon and time, calculate the its angles involving satellite and Sun 
@@ -75,7 +77,7 @@ def angle_2d(lat,lon,y,m,d,h):
             angles[i,j,4]=azimuthsun
     return angles
 
-def create_profile2d(f,fobs):
+def create_profile2d(f):
     # f is the GRiB2 file
     # fo is the file with the target grid
     # constants 
@@ -85,10 +87,12 @@ def create_profile2d(f,fobs):
 
     # open GRiB2 file 
     gfs = xr.open_dataset(f1, engine='pynio')
-    fo=xr.open_dataset(fobs)
-    y0=fo.lat
-    x0=fo.lon+360
-
+#    fo=xr.open_zarr(fobs)
+#    y0=fo.lat
+#    x0=fo.lon+360
+#    print(x0)
+#    print(y0)
+#    quit()
     y0=np.arange(20.0,45.0,0.25)
     x0=np.arange(255,290,0.25)
     n=len(y0)*len(x0)
@@ -119,7 +123,7 @@ def create_profile2d(f,fobs):
     # relative humidity
     q=gfs.RH_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
     #  interploate q to all levels (upper levels has no moisture)
-    qpint=q.interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
+    qpint=q # .interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
 
     # temp 
     t = gfs.TMP_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
@@ -140,31 +144,31 @@ def create_profile2d(f,fobs):
     rho=-(1+mixavg*fv)*dp/dz/g
 
     # ozone and the five types of "clouds"
-    o3=gfs.O3MR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
+    # o3=gfs.O3MR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    # o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
 
     cld=gfs.CLWMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    cld_pavg=cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
+    cld_pavg=cld.interp(lv_ISBL0=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
     cld_wc=cld_pavg*rho*-dz
     print(type(cld_pavg))
     print(type(cld_wc))
 
     ice_cld=gfs.ICMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    ice_cld_pavg = ice_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
+    ice_cld_pavg = ice_cld.interp(lv_ISBL0=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     ice_wc=ice_cld_pavg*rho*-dz
     
     rain_cld=gfs.RWMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    rain_cld_pavg = rain_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
+    rain_cld_pavg = rain_cld.interp(lv_ISBL0=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     rain_wc=rain_cld_pavg*rho*-dz
 
     
     snow_cld=gfs.SNMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    snow_cld_pavg = snow_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
+    snow_cld_pavg = snow_cld.interp(lv_ISBL0=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     snow_wc=snow_cld_pavg*rho*-dz
     
-    grp_cld=gfs.GRLE_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    grp_cld_pavg=grp_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
-    grp_wc=grp_cld_pavg*rho*-dz
+   # grp_cld=gfs.GRLE_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+   # grp_cld_pavg=grp_cld.interp(lv_ISBL7=pav0.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
+   # grp_wc=grp_cld_pavg*rho*-dz
     
     year=valid_time.year
     month=valid_time.month
@@ -184,8 +188,8 @@ def create_profile2d(f,fobs):
     datetimes[:, :, 5] = 0
 
     # u and v 10m
-    u10=gfs.UGRD_P0_L103_GLL0.sel(lv_HTGL8=10.0, lat_0=y0, lon_0=x0,method='nearest')
-    v10=gfs.VGRD_P0_L103_GLL0.sel(lv_HTGL8=10.0, lat_0=y0, lon_0=x0,method='nearest')
+    u10=gfs.UGRD_P0_L103_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    v10=gfs.VGRD_P0_L103_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
     #u10=u10*units.meter_per_second
     #v10=v10*units.meter_per_second
     speed10m = np.sqrt(u10 * u10 + v10 * v10)
@@ -194,8 +198,8 @@ def create_profile2d(f,fobs):
     # land mask 
     lm=gfs.LAND_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
     sm=1-lm
-    snow=gfs.CSNOW_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    ice=gfs.ICEC_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    snow=gfs.SNOWC_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    #ice=snow # gfs.ICEC_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # surface temp 
     sfctemp=gfs.TMP_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
@@ -226,25 +230,28 @@ def create_profile2d(f,fobs):
     pavg.name="player"
     tavg.name="temp"
     mixavg.name="moisture"
-    o3_pavg.name="o3"
+    #o3_pavg.name="o3"
     cld_wc.name="water_cloud"
     ice_wc.name='ice_cloud'
     snow_wc.name = 'snow_cloud'
     rain_wc.name = 'rain_cloud'
-    grp_wc.name = 'graupel_cloud'
+    #grp_wc.name = 'graupel_cloud'
     lm.name="landmask"
     sm.name="seamask"
     sfctemp.name="sfctemp"
     snow.name="snow_cover"
-    ice.name="ice_cover"
+    #ice.name="ice_cover"
     sfctype.name="land_type"
     speed10m.name='wind_speed'
     dir10m.name="wind_dir"
-    all_data=xr.merge([xangles,datetimes,pint,pavg,tavg,mixavg,o3_pavg,cld_wc,ice_wc,snow_wc,rain_wc,grp_wc,lm,sfctemp,snow,ice,sfctype,speed10m,dir10m])
+    all_data=xr.merge([xangles,datetimes,pint,pavg,tavg,mixavg,cld_wc,ice_wc,snow_wc,rain_wc,lm,sfctemp,snow,sfctype,speed10m,dir10m])
     print("combined")
-    all_data.to_netcdf("profile2d4_2019_dorain_gfs.nc","w")
+    if os.path.exists(outputfile):
+        os.remove(outputfile)
+    all_data.to_netcdf(outputfile,"w")
 
 
 if __name__ == "__main__":
-    create_profile2d(f1,fobs)
+    
+    create_profile2d(f1)
 

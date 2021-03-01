@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name=test_upp_goes
+#SBATCH --ntasks=1
+#SBATCH --time=00:30:00
+#SBATCH --account=dtc-hwrf
+#SBATCH --partition=debug
+###SBATCH -N 4 --ntasks-per-node=12
+###SBATCH -N 5 --ntasks-per-node=40
+#SBATCH --qos=debug
+#SBATCH --output=out.hafs_post
+#SBATCH --exclusive 
+module purge
+#. $MODULESHOME/init/sh
+module load intel
+#module load hdf5/1.10.5-parallel
+#module load netcdf/4.7.2-parallel
+ulimit unlimited
+cd $(pwd)
+conda activate geocat
+echo "hello" 
+for i in $(cat exps)
+do
+sed -s "s|EXP|$i|g" pycrtm_gfs.py > p1.py
+python p1.py
+done 
+
