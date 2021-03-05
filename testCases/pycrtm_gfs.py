@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#import ipdb
+#ipdb.set_trace()
 import configparser
 import os, sys 
 import numpy as np
@@ -13,7 +15,7 @@ import metpy
 import xesmf as xe
 
 fin="profiles/profile2d4_2019_dorain_gfs.nc"
-fobs="obs_grid.nc"
+fgrid="obs_grid.nc"
 
 
 def cntrl(profiles):
@@ -316,6 +318,23 @@ def test_T_sfc_min2deg(profiles):
     profiles.surfaceTemperatures[:,:]=profiles.surfaceTemperatures[:,:]-2.0
     return profiles
 
+def test_T_sfc_min3deg(profiles):
+    profiles.surfaceTemperatures[:,:]=profiles.surfaceTemperatures[:,:]-3.0
+    return profiles
+
+def test_T_sfc_min4deg(profiles):
+    profiles.surfaceTemperatures[:,:]=profiles.surfaceTemperatures[:,:]-4.0
+    return profiles
+
+def test_T_sfc_min5deg(profiles):
+    profiles.surfaceTemperatures[:,:]=profiles.surfaceTemperatures[:,:]-5.0
+    return profiles
+
+def test_T_sfc_min6deg(profiles):
+    profiles.surfaceTemperatures[:,:]=profiles.surfaceTemperatures[:,:]-6.0
+    return profiles
+
+
 def test_wind_10pct(profiles):
     profiles.windSpeed10m[:]=profiles.windSpeed10m[:]*1.1
     return profiles
@@ -349,63 +368,86 @@ def test_lai_m20pct(profiles):
     return profiles
 
 def test_aero_100pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002
-    profiles.aerosols[:,25:,0,1]=2.0
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002,0.0)
+    profiles.aerosols[:,:,0,1]=2.0
     profiles.aerosolType[:]=1
+    # 
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 def test_aero_10pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002*1.1
-    profiles.aerosols[:,25:,0,1]=2.0
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002*1.1,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 def test_aero_20pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002*1.2
-    profiles.aerosols[:,25:,0,1]=2.0
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002*1.2,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 def test_aero_m10pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002*0.9
-    profiles.aerosols[:,25:,0,1]=2.0
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002*0.9,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
-
 def test_aero_m20pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002*0.8
-    profiles.aerosols[:,25:,0,1]=2.0
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002*0.8,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 def test_aero_R_10pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002
-    profiles.aerosols[:,25:,0,1]=2.0*1.1
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0*1.1
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 def test_aero_R_20pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002
-    profiles.aerosols[:,25:,0,1]=2.0*1.2
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0*1.2
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 def test_aero_R_m10pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002
-    profiles.aerosols[:,25:,0,1]=2.0*0.9
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0*0.9
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
 
 
 def test_aero_R_m20pct(profiles):
-    profiles.aerosols[:,25:,0,0]=0.002
-    profiles.aerosols[:,25:,0,1]=2.0*0.8
+    __tmp__=profiles.clouds[:,:,0,0]
+    profiles.aerosols[:,:,0,0]=np.where(__tmp__>0.0,0.002,0.0) #0.002*1.1
+    profiles.aerosols[:,:,0,1]=2.0*0.8
     profiles.aerosolType[:]=1
+    #
+    profiles.clouds[:,:,0,0]=0.0
     return profiles
-
-    
-
 
 def main(coefficientPath, sensor_id, fin, experiment):
     # the profile from grb2 has 33 levels 
@@ -431,9 +473,6 @@ def main(coefficientPath, sensor_id, fin, experiment):
     profiles.P[:,:]=gfs.player[1:,:,:].stack(z=("lat_0","lon_0")).transpose()/100.0
 
     profiles.T[:,:] = gfs.temp[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
-
-
-
 
     Q=gfs.moisture[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     
@@ -548,7 +587,7 @@ def main(coefficientPath, sensor_id, fin, experiment):
         # prepare for interpolation 
         ds_in=result.rename({"lat_0": 'lat', "lon_0": 'lon'})    
         
-        fo=xr.open_dataset(fobs)
+        fo=xr.open_dataset(fgrid)
         lato=fo.lat.data
         lono=fo.lon.data
 

@@ -9,3 +9,6 @@ def test_answer():
         os.remove(fig_name)
     plot_pdf.plot(f,fig_name)
     assert path.exists(fig_name)
+
+
+    

@@ -6,6 +6,18 @@ class runcrtm(luigi.Task):
     def run(self):
         print("hello to run crtm")
 
+class Plot_aero(luigi.Task):
+
+    def output(self):
+        return luigi.LocalTarget('aero.png')
+
+    def run(self):
+        import plot_pdf
+        f="profiles/profile2d4_2019_dorain_gfs_output_test_aero_*round3*.nc"
+        fig_name="aero.png"
+        plot_pdf.plot(f,fig_name)
+
+
 class Plot_angle0(luigi.Task):
     def requires(self):
         return runcrtm()
