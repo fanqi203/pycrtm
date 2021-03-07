@@ -136,6 +136,7 @@ class pyCRTM:
         self.nThreads = 1
         self.MWwaterCoeff_File = 'FASTEM6.MWwater.EmisCoeff.bin'
         self.IRwaterCoeff_File = 'Nalli.IRwater.EmisCoeff.bin'
+        self.IRlandCoeff_File = 'USGS.IRland.EmisCoeff.bin'
     def loadInst(self):
         if ( os.path.exists( os.path.join(self.coefficientPath, self.sensor_id+'.SpcCoeff.bin') ) ):
             o = readSpcCoeff(os.path.join(self.coefficientPath, self.sensor_id+'.SpcCoeff.bin'))

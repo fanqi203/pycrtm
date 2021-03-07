@@ -22,5 +22,7 @@ for i in $(cat exps)
 do
 sed -s "s|EXP|$i|g" pycrtm_gfs.py > p1.py
 python p1.py
+#python plot_pdf.py
+#mv test.png $i.png
 done 
 

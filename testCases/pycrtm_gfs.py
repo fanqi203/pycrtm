@@ -21,6 +21,70 @@ fgrid="obs_grid.nc"
 def cntrl(profiles):
     return profiles
 
+def land01(profiles):
+    profiles.surfaceTypes[:,0] = 1
+    return profiles
+
+def land02(profiles):
+    profiles.surfaceTypes[:,0] = 2
+    return profiles
+
+def land03(profiles):
+    profiles.surfaceTypes[:,0] = 3
+    return profiles
+
+def land04(profiles):
+    profiles.surfaceTypes[:,0] = 4
+    return profiles
+
+def land05(profiles):
+    profiles.surfaceTypes[:,0] = 5
+    return profiles
+
+def land06(profiles):
+    profiles.surfaceTypes[:,0] = 6
+    return profiles
+
+def land07(profiles):
+    profiles.surfaceTypes[:,0] = 7
+    return profiles
+
+def land08(profiles):
+    profiles.surfaceTypes[:,0] = 8
+    return profiles
+
+def land09(profiles):
+    profiles.surfaceTypes[:,0] = 9
+    return profiles
+
+def land10(profiles):
+    profiles.surfaceTypes[:,0] = 10
+    return profiles
+
+def land11(profiles):
+    profiles.surfaceTypes[:,0] = 11
+    return profiles
+
+def land12(profiles):
+    profiles.surfaceTypes[:,0] = 12
+    return profiles
+
+def land13(profiles):
+    profiles.surfaceTypes[:,0] = 13
+    return profiles
+
+def land14(profiles):
+    profiles.surfaceTypes[:,0] = 14
+    return profiles
+
+def land15(profiles):
+    profiles.surfaceTypes[:,0] = 15
+    return profiles
+
+def land16(profiles):
+    profiles.surfaceTypes[:,0] = 16
+
+
 def test_angle0_0(profiles):
     profiles.Angles[:,0]=0
     return profiles
@@ -86,6 +150,10 @@ def test_angle4_60(profiles):
     return profiles
 def test_angle4_90(profiles):
     profiles.Angles[:,4]=90
+    return profiles
+
+def hydrozero(profiles):
+    profiles.clouds[:,:,:,0]=0.0
     return profiles
 
 def test_O3_0(profiles):
@@ -512,7 +580,7 @@ def main(coefficientPath, sensor_id, fin, experiment):
     profiles.cloudType[:,3]=4  
     profiles.cloudType[:,4]=5  
 
-    profiles.climatology[:]=6 #US_STANDARD_ATMOSPHERE #6 # place holder don't know 
+#    profiles.climatology[:]=6 #US_STANDARD_ATMOSPHERE #6 # place holder don't know 
 
 
     lands=gfs.landmask.stack(z=("lat_0","lon_0")).transpose()
@@ -542,8 +610,12 @@ def main(coefficientPath, sensor_id, fin, experiment):
     profiles.windDirection10m[:] = wind_dir[:] # h5['windDirection10m'][()]
 
     landtype=gfs.land_type[:,:,0].stack(z=("lat_0","lon_0")).transpose()
-    landtype=np.where(landtype > 14, 16.0, landtype)
-    landtype=np.where(landtype < 1.0, 1.0, landtype)
+#    landtype=np.where(landtype > 14, 16.0, landtype)
+#    landtype=np.where(landtype < 1.0, 1.0, landtype)
+    landtype=np.where(landtype > 0 , 1.0, 1.0) #landtype)
+#    landtype=np.where(landtype < 1.0, 14.0, 14.0) # landtype)
+
+
     
     profiles.surfaceTypes[:,0] = landtype 
     profiles.surfaceTypes[:,1] = 6 
@@ -552,7 +624,14 @@ def main(coefficientPath, sensor_id, fin, experiment):
     profiles.surfaceTypes[:,4] = 3 
     profiles.surfaceTypes[:,5] = 1 
 
+    
+
+#    profiles.surfaceTypes[:,:]=12
+
+
     profiles=experiment(profiles)
+
+    print(profiles)
 
     try:
         crtmOb = pyCRTM()
