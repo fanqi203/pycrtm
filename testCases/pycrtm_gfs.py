@@ -21,67 +21,84 @@ fgrid="obs_grid.nc"
 def cntrl(profiles):
     return profiles
 
-def land01(profiles):
+def testq01(profiles):
+    profiles.Q[:,:]=profiles.Q[:,:]*1.1
+    return profiles
+
+def testq02(profiles):
+    profiles.Q[:,:]=profiles.Q[:,:]*1.2
+    return profiles
+
+def testq03(profiles):
+    profiles.Q[:,:]=profiles.Q[:,:]*1.3
+    return profiles
+
+def testq04(profiles):
+    profiles.Q[32,:]=profiles.Q[32,:]*1.5
+    return profiles
+
+
+def test_land01(profiles):
     profiles.surfaceTypes[:,0] = 1
     return profiles
 
-def land02(profiles):
+def test_land02(profiles):
     profiles.surfaceTypes[:,0] = 2
     return profiles
 
-def land03(profiles):
+def test_land03(profiles):
     profiles.surfaceTypes[:,0] = 3
     return profiles
 
-def land04(profiles):
+def test_land04(profiles):
     profiles.surfaceTypes[:,0] = 4
     return profiles
 
-def land05(profiles):
+def test_land05(profiles):
     profiles.surfaceTypes[:,0] = 5
     return profiles
 
-def land06(profiles):
+def test_land06(profiles):
     profiles.surfaceTypes[:,0] = 6
     return profiles
 
-def land07(profiles):
+def test_land07(profiles):
     profiles.surfaceTypes[:,0] = 7
     return profiles
 
-def land08(profiles):
+def test_land08(profiles):
     profiles.surfaceTypes[:,0] = 8
     return profiles
 
-def land09(profiles):
+def test_land09(profiles):
     profiles.surfaceTypes[:,0] = 9
     return profiles
 
-def land10(profiles):
+def test_land10(profiles):
     profiles.surfaceTypes[:,0] = 10
     return profiles
 
-def land11(profiles):
+def test_land11(profiles):
     profiles.surfaceTypes[:,0] = 11
     return profiles
 
-def land12(profiles):
+def test_land12(profiles):
     profiles.surfaceTypes[:,0] = 12
     return profiles
 
-def land13(profiles):
+def test_land13(profiles):
     profiles.surfaceTypes[:,0] = 13
     return profiles
 
-def land14(profiles):
+def test_land14(profiles):
     profiles.surfaceTypes[:,0] = 14
     return profiles
 
-def land15(profiles):
+def test_land15(profiles):
     profiles.surfaceTypes[:,0] = 15
     return profiles
 
-def land16(profiles):
+def test_land16(profiles):
     profiles.surfaceTypes[:,0] = 16
 
 
@@ -523,7 +540,13 @@ def main(coefficientPath, sensor_id, fin, experiment):
     lat=gfs.lat_0
     lon=gfs.lon_0
 
-    profiles = profilesCreate(len(lat)*len(lon),33, nAerosols=0, nClouds = 5)
+    if not(experiment.__name__.find("aero")==-1):
+        nAerosols=1
+    else:
+        nAerosols=0
+
+    profiles = profilesCreate(len(lat)*len(lon),33, nAerosols=nAerosols, nClouds = 5)
+
     angles=gfs.xangles.stack(z=("lat_0","lon_0")).transpose()
 
 #    profiles.Angles[:,:] = angles[:,:]
@@ -631,7 +654,6 @@ def main(coefficientPath, sensor_id, fin, experiment):
 
     profiles=experiment(profiles)
 
-    print(profiles)
 
     try:
         crtmOb = pyCRTM()
@@ -643,6 +665,7 @@ def main(coefficientPath, sensor_id, fin, experiment):
         crtmOb.loadInst()
         crtmOb.runDirect()
         forwardTb = crtmOb.Bt
+        print(crtmOb.IRlandCoeff_File)
     except:
         print("error in ", experiment.__name__)
         #    forwardEmissivity = crtmOb.surfEmisRefl[0,:]
@@ -688,4 +711,5 @@ if __name__ == "__main__":
     pathInfo.read( os.path.join(parentDir,'crtm.cfg') ) 
     coefficientPath = pathInfo['CRTM']['coeffs_dir']
     sensor_id = 'abi_g16'
+    fin="profile2d4_2019_dorain_gfs.nc"
     main(coefficientPath, sensor_id, fin, EXP)

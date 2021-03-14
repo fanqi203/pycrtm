@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import ipdb
+#ipdb.set_trace()
 import configparser
 import os, sys
 from matplotlib import pyplot as plt
@@ -96,6 +98,7 @@ def create_profile2d(f,fobs):
     # p levels  
     pint=gfs.lv_ISBL0
 
+
     # heights 
     hgt=gfs.HGT_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
@@ -117,9 +120,9 @@ def create_profile2d(f,fobs):
     # qp=gfs.lv_ISBL5
 
     # relative humidity
-    q=gfs.RH_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    qq=gfs.RH_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
     #  interploate q to all levels (upper levels has no moisture)
-    qpint=q.interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
+    qpint=qq.interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
 
     # temp 
     t = gfs.TMP_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
@@ -128,8 +131,9 @@ def create_profile2d(f,fobs):
     mix = mixing_ratio_from_relative_humidity(pint.broadcast_like(t),t,qpint)
     mix=xr.DataArray(mix,coords=t.coords,dims=t.dims)
     mix.attrs['units']='kg/kg'
-    mixavg=mix.rolling(lv_ISBL0=2,center=True).mean()[1:]
-
+    # test another way to average mix
+    #mixavg=mix.rolling(lv_ISBL0=2,center=True).mean()[1:]
+    mixavg=mix[1:,:,:]
     # get the t and p for the layers (instead of levels)
     tavg=t.rolling(lv_ISBL0=2,center=True).mean()[1:]
     dp=xr.DataArray(np.diff(pint),dims=pint.dims).broadcast_like(tavg)
@@ -139,9 +143,13 @@ def create_profile2d(f,fobs):
     pavg=-R*tavg*(1+mixavg*fv)*dp/dz/g
     rho=-(1+mixavg*fv)*dp/dz/g
 
+    mixavg=mixavg*rho*-dz
+
     # ozone and the five types of "clouds"
     o3=gfs.O3MR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
     o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
+
+    o3_pavg=o3_pavg*rho*-dz
 
     cld=gfs.CLWMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
     cld_pavg=cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})

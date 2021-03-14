@@ -132,8 +132,9 @@ def create_profile2d(f):
     mix = mixing_ratio_from_relative_humidity(pint.broadcast_like(t),t,qpint)
     mix=xr.DataArray(mix,coords=t.coords,dims=t.dims)
     mix.attrs['units']='kg/kg'
-    mixavg=mix.rolling(lv_ISBL0=2,center=True).mean()[1:]
-
+    # test another way to average mix
+    #mixavg=mix.rolling(lv_ISBL0=2,center=True).mean()[1:]
+    mixavg=mix[1:,:,:]
     # get the t and p for the layers (instead of levels)
     tavg=t.rolling(lv_ISBL0=2,center=True).mean()[1:]
     dp=xr.DataArray(np.diff(pint),dims=pint.dims).broadcast_like(tavg)
@@ -142,6 +143,8 @@ def create_profile2d(f):
     g=9.8
     pavg=-R*tavg*(1+mixavg*fv)*dp/dz/g
     rho=-(1+mixavg*fv)*dp/dz/g
+
+    mixavg=mixavg*rho*-dz
 
     # ozone and the five types of "clouds"
     # o3=gfs.O3MR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')

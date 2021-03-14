@@ -28,7 +28,7 @@ def preprocessobs(ds):
 
 def hist(ch7):
     ch7flat=ch7.where(ch7>0).values.flatten()
-    [obshist, obsbin] = np.histogram(ch7flat, density=True, bins=np.arange(190, 320,3))
+    [obshist, obsbin] = np.histogram(ch7flat, density=True, bins=np.arange(180, 320, 3))
     avg_BT=ch7flat[np.where(ch7flat>0)].mean()
     labelstr=str(np.round(avg_BT,0))+' '+str(ch7.cases.values)
     return [obsbin, obshist,  labelstr]
@@ -39,7 +39,7 @@ def plot(cases, figname):
     xall=xr.open_mfdataset(f2,preprocess=preprocess,concat_dim="cases")
     ch7=xall.bt
 
-    f0="profiles/profile2d4_2019_dorain_gfs_output_test_cntrl*.nc"
+    f0="profile2d4_2019_dorain_gfs_output_cntrl.nc"
     x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases")
     ch7_cntrl=0.5*(x.bt[0,6]+x.bt[0,7])
 
@@ -58,17 +58,18 @@ def plot(cases, figname):
     for i in np.arange(ch7.shape[0]):
         ax.plot(hist(ch7[i,7])[0][1:],hist(ch7[i,7])[1][0:],label=hist(ch7[i,7])[2]) 
     
-    ax.plot(hist(ch7_cntrl)[0][1:],hist(ch7_cntrl)[1][0:],label=hist(ch7_cntrl)[2])
+    ax.plot(hist(ch7_cntrl)[0][1:],hist(ch7_cntrl)[1][0:],label="cntrl")
     ax.plot(hist(ch7_obs)[0][1:],hist(ch7_obs)[1][0:],label="obs")
     ax.plot(hist(ch7_sbt)[0][1:],hist(ch7_sbt)[1][0:],label="upp")
 
     legend=ax.legend(loc='best',shadow=False,fontsize='x-small')
     legend.get_frame().set_facecolor('C0')
     plt.legend()
-    plt.savefig(figname)
-    #plt.show()
+    #plt.savefig(figname)
+    plt.show()
 
 
-cases="profiles/profile2d4_2019_dorain_gfs_output_test_T_sfc_min6*.nc"
+cases="profile2d4_2019_dorain_gfs_output_test_land06*.nc"
+
 figname="test_t_sfc_min.png"
 plot(cases,figname)

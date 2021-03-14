@@ -5,7 +5,7 @@
 
 import xarray as xr
 import matplotlib
-matplotlib.use('AGG')# or PDF, SVG or PS
+#matplotlib.use('AGG')# or PDF, SVG or PS
  
 import matplotlib.pyplot as plt
 
@@ -56,6 +56,7 @@ def plot(cases, figname):
     x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases")
     ch7_cntrl=0.5*(x.bt[0,6]+x.bt[0,7])
 
+
     fobs="profiles/obs_dorian*.nc"
     obs=xr.open_mfdataset(fobs,preprocess=preprocessobs,concat_dim="cases")
     ch7_obs=obs.obs
@@ -74,8 +75,8 @@ def plot(cases, figname):
     def cond1(var,st,ed):
         return np.where((var > st) & (var < ed), var, np.nan)
 
-    st=100
-    ed=220
+    st=300
+    ed=320
     ax0.pcolor(cond1(ch7_cntrl,st,ed), vmin=220, vmax=320)
     ax0.set_title('cntrl'+str(ch7_cntrl.mean().values))
 
@@ -94,16 +95,14 @@ def plot(cases, figname):
 #    legend.get_frame().set_facecolor('C0')
 #    plt.legend()
 #    fig.tight_layout()
-    plt.savefig(figname)
-#    plt.show()
+#    plt.savefig(figname)
+    plt.show()
 
 
 
 
 from pathlib import Path
 
-pathlist = Path('profiles').glob('profile2d4_2019_dorain_gfs_output*.nc')
-for path in pathlist:
-    cases=str(path) #"profiles/profile2d4_2019_dorain_gfs_output_test_T_sfc_min6*.nc"
-    figname=cases+'.level5.png' #"test.png"
-    plot(cases,figname)
+cases="profile2d4_2019_dorain_gfs_output_cntrl.nc"
+figname=cases+'.newq.png' #"test.png"
+plot(cases,figname)
