@@ -67,7 +67,7 @@ def plot(cases, figname):
     ch7_sbt=sbt.SBT124_P0_L8_GLC0
 
 
-    fig,(ax0,ax1,ax2) = plt.subplots(3, 1)
+    fig,(ax0,ax1) = plt.subplots(2, 1)
 
 #    for i in np.arange(ch7.shape[0]):
 #        ax.plot(hist(ch7[i,7])[0][1:],hist(ch7[i,7])[1][0:],label=hist(ch7[i,7])[2]) 
@@ -75,18 +75,18 @@ def plot(cases, figname):
     def cond1(var,st,ed):
         return np.where((var > st) & (var < ed), var, np.nan)
 
-    st=300
+    st=200
     ed=320
-    ax0.pcolor(cond1(ch7_cntrl,st,ed), vmin=220, vmax=320)
-    ax0.set_title('cntrl'+str(ch7_cntrl.mean().values))
+    ax0.pcolor(cond1(ch7_cntrl,st,ed), vmin=200, vmax=320)
+    ax0.set_title('cntrl') #+str(ch7_cntrl.mean().values))
 
-    ax1.pcolor(cond1(ch7_obs[0],st,ed), vmin=220, vmax=320)
+    ax1.pcolor(cond1(ch7_obs[0],st,ed), vmin=200, vmax=320)
     ax1.set_title('obs')
 
-    ax2.pcolor(cond1(ch7_sbt[0],st,ed), vmin=220, vmax=320)
-    ax2.set_title('sbt')
+#    ax2.pcolor(cond1(ch7_sbt[0],st,ed), vmin=200, vmax=320)
+#    ax2.set_title('sbt')
 
-    profile=xr.open_dataset("profiles/profile2d4_2019_dorain_gfs.nc")
+#    profile=xr.open_dataset("profiles/profile2d4_2019_dorain_gfs.nc")
 
 #    ax[1].plot(hist(ch7_obs)[0][1:],hist(ch7_obs)[1][0:],label="obs")
 #    ax[2].plot(hist(ch7_sbt)[0][1:],hist(ch7_sbt)[1][0:],label="upp")
@@ -104,5 +104,6 @@ def plot(cases, figname):
 from pathlib import Path
 
 cases="profile2d4_2019_dorain_gfs_output_cntrl.nc"
+cases="profile2d4_2019_dorain_gfs_new_q_output_cntrl.nc"
 figname=cases+'.newq.png' #"test.png"
 plot(cases,figname)

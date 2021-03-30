@@ -18,7 +18,7 @@ fin="profiles/profile2d4_2019_dorain_gfs.nc"
 fgrid="obs_grid.nc"
 
 
-def cntrl(profiles):
+def test_control(profiles):
     return profiles
 
 def testq01(profiles):

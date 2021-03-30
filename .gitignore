@@ -6,3 +6,5 @@
 *.mod
 log
 .DS_Store
+*.nc
+*.png
