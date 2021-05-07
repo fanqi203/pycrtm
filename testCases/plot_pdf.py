@@ -55,7 +55,7 @@ def plot(cases, figname):
 
     f0="profile2d4_2019_dorain_gfs_output_test_control.nc"
     x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases")
-    ch7_cntrl=0.5*(x.bt[0,7]+x.bt[0,7])
+    ch7_cntrl=0.5*(x.bt[0,6]+x.bt[0,7])
 
     fobs="profiles/obs_dorian*.nc"
     obs=xr.open_mfdataset(fobs,preprocess=preprocessobs,concat_dim="cases")
@@ -69,14 +69,14 @@ def plot(cases, figname):
 
     fig, ax = plt.subplots(1, 1)
 
-    for i in np.arange(ch7.shape[0]):
-        ax.plot(hist(ch7[i,7])[0][1:],hist(ch7[i,7])[1][0:],label=hist(ch7[i,7])[2]) 
+#    for i in np.arange(ch7.shape[0]):
+#        ax.plot(hist(ch7[i,7])[0][1:],hist(ch7[i,7])[1][0:],label=hist(ch7[i,7])[2]) 
         
 
 
     ax.plot(hist(ch7_cntrl)[0][1:],hist(ch7_cntrl)[1][0:],label=hist(ch7_cntrl)[2],linewidth=3.0,c='black')
 
-#    ax.plot(hist(ch7_obs)[0][1:],hist(ch7_obs)[1][0:],label="obs")
+    ax.plot(hist(ch7_obs)[0][1:],hist(ch7_obs)[1][0:],label="obs")
 #    ax.plot(hist(ch7_sbt)[0][1:],hist(ch7_sbt)[1][0:],label="upp")
 
     legend=ax.legend(loc='best',shadow=False)

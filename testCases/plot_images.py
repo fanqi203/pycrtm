@@ -105,5 +105,6 @@ from pathlib import Path
 
 cases="profile2d4_2019_dorain_gfs_output_cntrl.nc"
 cases="profile2d4_2019_dorain_gfs_new_q_output_cntrl.nc"
+cases="profile2d4_2019_dorain_gfs_output_test_control.nc"
 figname=cases+'.newq.png' #"test.png"
 plot(cases,figname)
