@@ -14,7 +14,7 @@ from metpy.calc import *
 import metpy
 import xesmf as xe
 
-fin="profiles/profile2d4_2019_dorain_gfs.nc"
+fin="profile2d4_2021_gfs_EMCUPP.nc" # profiles/profile2d4_2019_dorain_gfs.nc"
 fgrid="obs_grid.nc"
 
 
@@ -545,7 +545,7 @@ def main(coefficientPath, sensor_id, fin, experiment):
     else:
         nAerosols=0
 
-    profiles = profilesCreate(len(lat)*len(lon),33, nAerosols=nAerosols, nClouds = 5)
+    profiles = profilesCreate(len(lat)*len(lon),44, nAerosols=nAerosols, nClouds = 5)
 
     angles=gfs.xangles.stack(z=("lat_0","lon_0")).transpose()
 
@@ -711,5 +711,5 @@ if __name__ == "__main__":
     pathInfo.read( os.path.join(parentDir,'crtm.cfg') ) 
     coefficientPath = pathInfo['CRTM']['coeffs_dir']
     sensor_id = 'abi_g16'
-    fin="profile2d4_2019_dorain_gfs.nc"
-    main(coefficientPath, sensor_id, fin, EXP)
+    fin="profile2d4_2021_gfs_EMCUPP.nc" # profile2d4_2019_dorain_gfs.nc"
+    main(coefficientPath, sensor_id, fin, test_control)

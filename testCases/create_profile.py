@@ -17,14 +17,9 @@ from skyfield.api import EarthSatellite, Topos, load
 import numpy as np
 from datetime import datetime, timedelta
 
-
-f1="/Users/sbao/PycharmProjects/nggps_py/pycrtm/gfs.t06z.pgrb2.0p25.f120"
-f1="/Users/sbao/PycharmProjects/nggps_py/pycrtm/gfs.t00z.pgrb2.0p25.f000.2019"
-
-fobs="/Users/sbao/PycharmProjects/nggps_py/gfsv15_total_add_on.zarr"
 fobs="obs_grid.nc"
 f1="tar/gfs.t18z.pgrb2.0p25.f003"
-
+f1="/work/noaa/dtc-hwrf/sbao/EMC_post/DOMAINPATH/postprd/GFSPRS.006"
 n_clouds=5
 n_aerosol=1
 
@@ -87,9 +82,6 @@ def create_profile2d(f,fobs):
 
     # open GRiB2 file 
     gfs = xr.open_dataset(f1, engine='pynio')
-    fo=xr.open_dataset(fobs)
-    y0=fo.lat
-    x0=fo.lon+360
 
     y0=np.arange(20.0,45.0,0.25)
     x0=np.arange(255,290,0.25)
@@ -100,7 +92,7 @@ def create_profile2d(f,fobs):
 
 
     # heights 
-    hgt=gfs.HGT_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    hgt=gfs.HGT_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # y m d h
     init_time = hgt.initial_time
@@ -120,12 +112,13 @@ def create_profile2d(f,fobs):
     # qp=gfs.lv_ISBL5
 
     # relative humidity
-    qq=gfs.RH_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    qq=gfs.RH_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     #  interploate q to all levels (upper levels has no moisture)
-    qpint=qq.interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
+    #  qpint=qq.interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
+    qpint=qq # in new input file qq are on all p levels
 
     # temp 
-    t = gfs.TMP_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    t = gfs.TMP_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # mixing ratio 
     mix = mixing_ratio_from_relative_humidity(pint.broadcast_like(t),t,qpint)
@@ -146,31 +139,31 @@ def create_profile2d(f,fobs):
     mixavg=mixavg*rho*-dz
 
     # ozone and the five types of "clouds"
-    o3=gfs.O3MR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
+    o3=gfs.O3MR_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    #o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
 
-    o3_pavg=o3_pavg*rho*-dz
+    o3_pavg=o3*rho*-dz
 
-    cld=gfs.CLWMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    cld=gfs.CLWMR_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     cld_pavg=cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
     cld_wc=cld_pavg*rho*-dz
     print(type(cld_pavg))
     print(type(cld_wc))
 
-    ice_cld=gfs.ICMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    ice_cld=gfs.ICMR_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     ice_cld_pavg = ice_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     ice_wc=ice_cld_pavg*rho*-dz
     
-    rain_cld=gfs.RWMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    rain_cld=gfs.RWMR_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     rain_cld_pavg = rain_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     rain_wc=rain_cld_pavg*rho*-dz
 
     
-    snow_cld=gfs.SNMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    snow_cld=gfs.SNMR_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     snow_cld_pavg = snow_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     snow_wc=snow_cld_pavg*rho*-dz
     
-    grp_cld=gfs.GRLE_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    grp_cld=gfs.GRLE_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     grp_cld_pavg=grp_cld.interp(lv_ISBL7=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     grp_wc=grp_cld_pavg*rho*-dz
     
@@ -192,21 +185,21 @@ def create_profile2d(f,fobs):
     datetimes[:, :, 5] = 0
 
     # u and v 10m
-    u10=gfs.UGRD_P0_L103_GLL0.sel(lv_HTGL8=10.0, lat_0=y0, lon_0=x0,method='nearest')
-    v10=gfs.VGRD_P0_L103_GLL0.sel(lv_HTGL8=10.0, lat_0=y0, lon_0=x0,method='nearest')
+    u10=gfs.UGRD_P0_L103_GGA0.sel(lv_HTGL8=10.0, lat_0=y0, lon_0=x0,method='nearest')
+    v10=gfs.VGRD_P0_L103_GGA0.sel(lv_HTGL8=10.0, lat_0=y0, lon_0=x0,method='nearest')
     #u10=u10*units.meter_per_second
     #v10=v10*units.meter_per_second
     speed10m = np.sqrt(u10 * u10 + v10 * v10)
     dir10m=np.arctan2(v10, u10)/np.pi*180
 
     # land mask 
-    lm=gfs.LAND_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    lm=gfs.LAND_P0_L1_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     sm=1-lm
-    snow=gfs.CSNOW_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    ice=gfs.ICEC_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    snow=gfs.CSNOW_P0_L1_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    ice=gfs.ICEC_P0_L1_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # surface temp 
-    sfctemp=gfs.TMP_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    sfctemp=gfs.TMP_P0_L1_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # surface type 
     sfctype=xr.DataArray(np.zeros((len(y0),len(x0),6)),dims=[t.dims[1],t.dims[2],'type'],coords=[t.coords['lat_0'],t.coords['lon_0'],np.arange(0,6)])
@@ -250,7 +243,7 @@ def create_profile2d(f,fobs):
     dir10m.name="wind_dir"
     all_data=xr.merge([xangles,datetimes,pint,pavg,tavg,mixavg,o3_pavg,cld_wc,ice_wc,snow_wc,rain_wc,grp_wc,lm,sfctemp,snow,ice,sfctype,speed10m,dir10m])
     print("combined")
-    all_data.to_netcdf("profile2d4_2019_dorain_gfs.nc","w")
+    all_data.to_netcdf("profile2d4_2021_gfs_EMCUPP.nc","w")
 
 
 if __name__ == "__main__":
