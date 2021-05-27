@@ -50,20 +50,20 @@ def hist(ch7):
 def plot(cases, figname):
     
     f2=cases #"profiles/profile2d4_2019_dorain_gfs_output_test_angle*.nc"
-    xall=xr.open_mfdataset(f2,preprocess=preprocess,concat_dim="cases")
-    ch7=xall.bt
+    xall=xr.open_mfdataset(f2,preprocess=preprocess,concat_dim="cases", engine='pynio')
+    ch7_cntrl=xall.bt[0,7]
 
-    f0="profile2d4_2019_dorain_gfs_output_test_control.nc"
-    x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases")
-    ch7_cntrl=0.5*(x.bt[0,6]+x.bt[0,6])
+#    f0="profile2d4_2019_dorain_gfs_output_test_control.nc"
+#    x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases")
+#    ch7_cntrl=0.5*(x.bt[0,6]+x.bt[0,6])
 
     fobs="fobs.nc"
-    obs=xr.open_mfdataset(fobs,preprocess=preprocessobs,concat_dim="cases")
+    obs=xr.open_mfdataset(fobs,preprocess=preprocessobs,concat_dim="cases",engine='pynio')
     ch7_obs=obs.CMI_C13
 
 
     fsbt="sbt_2021_sbt_regrid.nc" # sbt_2021_regrid.nc" # profiles/sbt_dorian_regrid.nc"
-    sbt=xr.open_mfdataset(fsbt,preprocess=preprocessobs,concat_dim="cases")
+    sbt=xr.open_mfdataset(fsbt,preprocess=preprocessobs,concat_dim="cases",engine='pynio')
     ch7_sbt=sbt.SBT124_P0_L8_GGA0 # VAR_3_192_58_P0_L8_GGA0 #SBT124_P0_L8_GLC0
 
 
@@ -83,8 +83,8 @@ def plot(cases, figname):
 #fontsize='x-small',
     legend.get_frame().set_facecolor('C0')
     plt.legend()
-    plt.savefig(figname)
-    #plt.show()
+    #plt.savefig(figname)
+    plt.show()
 
 
 

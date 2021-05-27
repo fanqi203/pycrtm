@@ -14,7 +14,7 @@ from metpy.calc import *
 import metpy
 import xesmf as xe
 
-fin="profile2d4_2021_gfs_EMCUPP.nc" # profiles/profile2d4_2019_dorain_gfs.nc"
+fin="profile2d4_2021_gfs_EMCUPP_qv1000.nc" # profiles/profile2d4_2019_dorain_gfs.nc"
 fgrid="obs_grid.nc"
 
 
@@ -536,7 +536,7 @@ def test_aero_R_m20pct(profiles):
 
 def main(coefficientPath, sensor_id, fin, experiment):
     # the profile from grb2 has 33 levels 
-    gfs=xr.open_dataset(fin)
+    gfs=xr.open_dataset(fin,engine='pynio')
     lat=gfs.lat_0
     lon=gfs.lon_0
 
@@ -550,11 +550,11 @@ def main(coefficientPath, sensor_id, fin, experiment):
     angles=gfs.xangles.stack(z=("lat_0","lon_0")).transpose()
 
 #    profiles.Angles[:,:] = angles[:,:]
-    profiles.Angles[:,0] =  angles[:,0] #h5['zenithAngle'][()]
-    profiles.Angles[:,1] =  angles[:,1]
-    profiles.Angles[:,2] =  angles[:,3]  # 100 degrees zenith below horizon.
-    profiles.Angles[:,3] =  angles[:,4] # zero solar azimuth 
-    profiles.Angles[:,4] =  angles[:,2] # h5['scanAngle'][()]
+    profiles.Angles[:,0] =  angles[:,0] #sensor zenith #h5['zenithAngle'][()]
+    profiles.Angles[:,1] =  angles[:,1] #sensor azimuth
+    profiles.Angles[:,2] =  angles[:,3] #sensor scane  # 100 degrees zenith below horizon.
+    profiles.Angles[:,3] =  angles[:,4] #solor zenith  zero solar azimuth 
+    profiles.Angles[:,4] =  angles[:,2] #solor azimuth  h5['scanAngle'][()]
 
     # date time not used. 
     datetimes=gfs.valid_time.stack(z=("lat_0","lon_0")).transpose()
@@ -689,12 +689,12 @@ def main(coefficientPath, sensor_id, fin, experiment):
         # prepare for interpolation 
         ds_in=result.rename({"lat_0": 'lat', "lon_0": 'lon'})    
         
-        fo=xr.open_dataset(fgrid)
+        fo=xr.open_dataset(fgrid,engine='pynio')
         lato=fo.lat.data
         lono=fo.lon.data
 
         ds_out = xr.Dataset({'lat': (['lat'], lato),'lon': (['lon'], lono),})
-        regridder = xe.Regridder(ds_in, ds_out, 'bilinear',reuse_weights=True)
+        regridder = xe.Regridder(ds_in, ds_out, 'bilinear',filename="abc.nc",reuse_weights=True)
 
         dr_out = regridder(result)
         out = dr_out.where(fo.obs.data>0)
@@ -711,5 +711,5 @@ if __name__ == "__main__":
     pathInfo.read( os.path.join(parentDir,'crtm.cfg') ) 
     coefficientPath = pathInfo['CRTM']['coeffs_dir']
     sensor_id = 'abi_g16'
-    fin="profile2d4_2021_gfs_EMCUPP.nc" # profile2d4_2019_dorain_gfs.nc"
+    fin="profile2d4_2021_gfs_EMCUPP_qv1000.nc" # profile2d4_2019_dorain_gfs.nc"
     main(coefficientPath, sensor_id, fin, test_control)

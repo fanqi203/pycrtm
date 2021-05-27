@@ -120,13 +120,20 @@ def create_profile2d(f,fobs):
     # temp 
     t = gfs.TMP_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
 
-    # mixing ratio 
-    mix = mixing_ratio_from_relative_humidity(pint.broadcast_like(t),t,qpint)
+    # mixing ratio from specific humidity
+
+    sphd=gfs.SPFH_P0_L100_GGA0.sel(lat_0=y0,lon_0=x0,method='nearest')
+    mix=sphd/(1-sphd)*1000
+    
+    # the mixing ration from RH is saved here but not used.
+    mix_metpy = mixing_ratio_from_relative_humidity(pint.broadcast_like(t),t,qpint)
+
     mix=xr.DataArray(mix,coords=t.coords,dims=t.dims)
     mix.attrs['units']='kg/kg'
+
     # test another way to average mix
-    #mixavg=mix.rolling(lv_ISBL0=2,center=True).mean()[1:]
-    mixavg=mix[1:,:,:]
+    mixavg=mix.rolling(lv_ISBL0=2,center=True).mean()[1:]
+
     # get the t and p for the layers (instead of levels)
     tavg=t.rolling(lv_ISBL0=2,center=True).mean()[1:]
     dp=xr.DataArray(np.diff(pint),dims=pint.dims).broadcast_like(tavg)
@@ -136,8 +143,8 @@ def create_profile2d(f,fobs):
     pavg=-R*tavg*(1+mixavg*fv)*dp/dz/g
     rho=-(1+mixavg*fv)*dp/dz/g
 
-    mixavg=mixavg*rho*-dz
-
+    mixavg=mixavg #2000.0 #rho*-dz
+    print(mixavg.max())
     # ozone and the five types of "clouds"
     o3=gfs.O3MR_P0_L100_GGA0.sel(lat_0=y0, lon_0=x0,method='nearest')
     #o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
@@ -243,7 +250,7 @@ def create_profile2d(f,fobs):
     dir10m.name="wind_dir"
     all_data=xr.merge([xangles,datetimes,pint,pavg,tavg,mixavg,o3_pavg,cld_wc,ice_wc,snow_wc,rain_wc,grp_wc,lm,sfctemp,snow,ice,sfctype,speed10m,dir10m])
     print("combined")
-    all_data.to_netcdf("profile2d4_2021_gfs_EMCUPP.nc","w")
+    all_data.to_netcdf("profile2d4_2021_gfs_EMCUPP_qv1000.nc","w")
 
 
 if __name__ == "__main__":

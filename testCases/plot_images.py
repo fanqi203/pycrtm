@@ -53,18 +53,18 @@ def plot(cases, figname):
     f0="profiles/profile2d4_2019_dorain_gfs_output_test_T_sfc_min6deg"
     f0="profiles/profile2d4_2019_dorain_gfs_output_hydrozero.nc"
     f0=cases # "profiles/profile2d4_2019_dorain_gfs_output_cntrl.nc"
-    x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases")
+    x=xr.open_mfdataset(f0,preprocess=preprocess,concat_dim="cases",engine='pynio')
     ch7_cntrl=0.5*(x.bt[0,6]+x.bt[0,7])
 
 
     fobs="fobs.nc" #profiles/obs_dorian*.nc"
-    obs=xr.open_mfdataset(fobs,preprocess=preprocessobs,concat_dim="cases")
+    obs=xr.open_mfdataset(fobs,preprocess=preprocessobs,concat_dim="cases",engine='pynio')
     ch7_obs=obs.CMI_C13 # obs
 
 
     fsbt="profiles/sbt_dorian_regrid.nc"
     fsbt="sbt_2021_sbt_regrid.nc"
-    sbt=xr.open_mfdataset(fsbt,preprocess=preprocessobs,concat_dim="cases")
+    sbt=xr.open_mfdataset(fsbt,preprocess=preprocessobs,concat_dim="cases",engine='pynio')
     ch7_sbt=sbt.SBT124_P0_L8_GGA0 # VAR_3_192_58_P0_L8_GGA0
 
 
@@ -96,8 +96,8 @@ def plot(cases, figname):
 #    legend.get_frame().set_facecolor('C0')
 #    plt.legend()
 #    fig.tight_layout()
-    plt.savefig(figname)
-    #plt.show()
+    #plt.savefig(figname)
+    plt.show()
 
 
 
@@ -107,6 +107,7 @@ from pathlib import Path
 cases="profile2d4_2019_dorain_gfs_output_cntrl.nc"
 cases="profile2d4_2019_dorain_gfs_new_q_output_cntrl.nc"
 cases="profile2d4_2019_dorain_gfs_output_test_control.nc"
-cases="profile2d4_2021_gfs_EMCUPP_output_test_control.nc"
+cases="profile2d4_2021_gfs_EMCUPP_output_simplest.nc"
+cases="profile2d4_2021_gfs_EMCUPP_qv1000_output_test_control.nc"
 figname=cases+'.png' #"test.png"
 plot(cases,figname)
