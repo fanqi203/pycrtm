@@ -545,7 +545,7 @@ def main(coefficientPath, sensor_id, fin, experiment):
     else:
         nAerosols=0
 
-    profiles = profilesCreate(len(lat)*len(lon),44, nAerosols=nAerosols, nClouds = 5)
+    profiles = profilesCreate(len(lat)*len(lon),gfs.lv_ISBL0.shape[0]-1, nAerosols=nAerosols, nClouds = 5)
 
     angles=gfs.xangles.stack(z=("lat_0","lon_0")).transpose()
 
@@ -573,28 +573,33 @@ def main(coefficientPath, sensor_id, fin, experiment):
 
     cld=gfs.water_cloud[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     cld=np.where(cld<0,0, cld)
+    cld_effr=gfs.water_cloud_effr[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     profiles.clouds[:,:,0,0]=cld 
-    profiles.clouds[:,:,0,1]=10.0
+    profiles.clouds[:,:,0,1]=cld_effr
 
     ice=gfs.ice_cloud[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     ice=np.where(ice<0,0,ice)
+    ice_effr=gfs.ice_cloud_effr[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     profiles.clouds[:,:,1,0]=ice 
-    profiles.clouds[:,:,1,1]=75
+    profiles.clouds[:,:,1,1]=ice_effr
 
     rain=gfs.rain_cloud[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     rain=np.where(rain<0,0,rain)
+    rain_effr=gfs.rain_cloud_effr[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     profiles.clouds[:,:,2,0]=rain 
-    profiles.clouds[:,:,2,1]=50 
+    profiles.clouds[:,:,2,1]=rain_effr
 
     snow=gfs.snow_cloud[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     snow=np.where(snow<0,0,snow)
+    snow_effr=gfs.snow_cloud_effr[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     profiles.clouds[:,:,3,0]=snow 
-    profiles.clouds[:,:,3,1]=50 
+    profiles.clouds[:,:,3,1]=snow_effr
 
     graupel=gfs.graupel_cloud[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     graupel=np.where(graupel<0,0,graupel)
+    graupel_effr=gfs.graupel_cloud_effr[1:,:,:].stack(z=("lat_0","lon_0")).transpose()
     profiles.clouds[:,:,4,0]=graupel 
-    profiles.clouds[:,:,4,1]=50 
+    profiles.clouds[:,:,4,1]=graupel_effr 
 
 
     profiles.cloudType[:,0]=1  
