@@ -63,9 +63,9 @@ def plot(cases, figname):
 
 
     fsbt="profiles/sbt_dorian_regrid.nc"
-    fsbt="sbt_2021_sbt_regrid.nc"
+    fsbt="sbt_2021_regrid.nc"
     sbt=xr.open_mfdataset(fsbt,preprocess=preprocessobs,concat_dim="cases",engine='pynio')
-    ch7_sbt=sbt.SBT124_P0_L8_GGA0 # VAR_3_192_58_P0_L8_GGA0
+    ch7_sbt=sbt.VAR_3_192_58_P0_L8_GGA0 # VAR_3_192_58_P0_L8_GGA0
 
 
     fig,(ax0,ax1,ax2) = plt.subplots(3, 1)
@@ -78,13 +78,13 @@ def plot(cases, figname):
 
     st=200
     ed=320
-    ax0.pcolor(cond1(ch7_cntrl,st,ed), vmin=270, vmax=290)
+    ax0.pcolor(cond1(ch7_cntrl,st,ed), vmin=220, vmax=320)
     ax0.set_title('cntrl') #+str(ch7_cntrl.mean().values))
 
-    ax1.pcolor(cond1(ch7_sbt[0],st,ed), vmin=270, vmax=290)
+    ax1.pcolor(cond1(ch7_sbt[0],st,ed), vmin=220, vmax=320)
     ax1.set_title('sbt')
 
-    ax2.pcolor(cond1(ch7_obs[0],st,ed), vmin=270, vmax=290)
+    ax2.pcolor(cond1(ch7_obs[0],st,ed), vmin=220, vmax=320)
     ax2.set_title('obs')
 
 #    profile=xr.open_dataset("profiles/profile2d4_2019_dorain_gfs.nc")

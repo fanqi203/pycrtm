@@ -20,14 +20,14 @@ from datetime import datetime, timedelta
 fobs="obs_grid.nc"
 f1="tar/gfs.t18z.pgrb2.0p25.f003"
 f1="tar/gfs.t12z.pgrb2.0p25.f006"
-#f1="/work/noaa/dtc-hwrf/sbao/EMC_post/DOMAINPATH/postprd/GFSPRS.006"
+f1="/work/noaa/dtc-hwrf/sbao/EMC_post/DOMAINPATH/postprd/GFSPRS.006.iveg2.grb2"
 n_clouds=5
 n_aerosol=1
 
 
 def find_var(f,string):
     for i in f:
-        if string in i:
+        if (string in i and i.startswith(string[0:3])):
             found=i
     return found
 
@@ -180,7 +180,7 @@ def create_profile2d(f,fobs):
 
 
     # heights 
-    hgt=gfs[find_var(gfs,"HGT_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    hgt=gfs[find_var(gfs,"HGT_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # y m d h
     init_time = hgt.initial_time
@@ -200,17 +200,17 @@ def create_profile2d(f,fobs):
     # qp=gfs.lv_ISBL5
 
     # relative humidity
-    qq=gfs[find_var(gfs,"RH_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    qq=gfs[find_var(gfs,"RH_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     #  interploate q to all levels (upper levels has no moisture)
     #  qpint=qq.interp(lv_ISBL5=pint,kwargs={"fill_value": 0.0})
     qpint=qq # in new input file qq are on all p levels
 
     # temp 
-    t = gfs[find_var(gfs,"TMP_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    t = gfs[find_var(gfs,"TMP_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
 
     # mixing ratio from specific humidity
 
-    sphd=gfs[find_var(gfs,"SPFH_P0_L100")].sel(lat_0=y0,lon_0=x0,method='nearest')
+    sphd=gfs[find_var(gfs,"SPFH_P0_L100_")].sel(lat_0=y0,lon_0=x0,method='nearest')
     mix=sphd/(1-sphd)*1000
     
     # the mixing ration from RH is saved here but not used.
@@ -234,13 +234,13 @@ def create_profile2d(f,fobs):
     mixavg=mixavg #2000.0 #rho*-dz
     print(mixavg.max())
     # ozone and the five types of "clouds"
-    o3=gfs[find_var(gfs,"O3MR_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    o3=gfs[find_var(gfs,"O3MR_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     #o3_pavg=o3.interp(lv_ISBL12=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
 
     o3_pavg=o3*rho*-dz
 
 #    cld=gfs.CLWMR_P0_L100_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    cld=gfs[find_var(gfs,"CLWMR_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    cld=gfs[find_var(gfs,"CLWMR_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     cld=cld.rename({cld.dims[0]: 'lv_ISBL_HYD'})
     cld_pavg=cld.interp(lv_ISBL_HYD=pavg.coords['lv_ISBL0'],kwargs={"fill_value": 0.0})
     cld_effr=effr_cld(cld_pavg)
@@ -248,27 +248,27 @@ def create_profile2d(f,fobs):
 
 
 
-    ice_cld=gfs[find_var(gfs,"ICMR_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    ice_cld=gfs[find_var(gfs,"ICMR_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     ice_cld=ice_cld.rename({ice_cld.dims[0]: 'lv_ISBL_HYD'})
     ice_cld_pavg = ice_cld.interp(lv_ISBL_HYD=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     ice_effr=effr_ice(ice_cld_pavg,t)
     ice_wc=ice_cld_pavg*rho*-dz
     
     
-    rain_cld=gfs[find_var(gfs,"RWMR_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    rain_cld=gfs[find_var(gfs,"RWMR_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     rain_cld=rain_cld.rename({rain_cld.dims[0]: 'lv_ISBL_HYD'})
     rain_cld_pavg = rain_cld.interp(lv_ISBL_HYD=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     rain_effr=effr_rain(rain_cld_pavg)
     rain_wc=rain_cld_pavg*rho*-dz
 
     
-    snow_cld=gfs[find_var(gfs,"SNMR_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    snow_cld=gfs[find_var(gfs,"SNMR_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     snow_cld=snow_cld.rename({snow_cld.dims[0]: 'lv_ISBL_HYD'})
     snow_cld_pavg = snow_cld.interp(lv_ISBL_HYD=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     snow_effr=effr_snow(snow_cld_pavg)
     snow_wc=snow_cld_pavg*rho*-dz
     
-    grp_cld=gfs[find_var(gfs,"GRLE_P0_L100")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    grp_cld=gfs[find_var(gfs,"GRLE_P0_L100_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     grp_cld=grp_cld.rename({grp_cld.dims[0]: 'lv_ISBL_HYD'})
     grp_cld_pavg=grp_cld.interp(lv_ISBL_HYD=pavg.coords['lv_ISBL0'], kwargs={"fill_value": 0.0})
     grp_effr=effr_snow(grp_cld_pavg)
@@ -292,24 +292,33 @@ def create_profile2d(f,fobs):
     datetimes[:, :, 5] = 0
 
     # u and v 10m
-    u10=gfs.UGRD_P0_L103_GLL0
+    u10=gfs[find_var(gfs,"UGRD_P0_L103_")]
     u10=u10.rename({u10.dims[0]:'lv_HTGL_wind'})
     u10=u10.sel(lv_HTGL_wind=10.0, lat_0=y0, lon_0=x0,method='nearest')
-    v10=gfs.VGRD_P0_L103_GLL0
+    v10=gfs[find_var(gfs,"VGRD_P0_L103_")]
     v10=v10.rename({v10.dims[0]:'lv_HTGL_wind'})
     v10=v10.sel(lv_HTGL_wind=10.0, lat_0=y0, lon_0=x0,method='nearest')
- 
+    
+    print(u10.max(),u10.min())
+
     speed10m = np.sqrt(u10 * u10 + v10 * v10)
     dir10m=np.arctan2(v10, u10)/np.pi*180
 
     # land mask 
-    lm=gfs.LAND_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    lm=gfs[find_var(gfs,"LAND_P0_L1_")].sel(lat_0=y0, lon_0=x0,method='nearest')
     sm=1-lm
-    snow=gfs.CSNOW_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
-    ice=gfs.ICEC_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    snow=gfs[find_var(gfs,"CSNOW_P0_L1_")].sel(lat_0=y0, lon_0=x0,method='nearest')
+    ice=gfs[find_var(gfs,"ICEC_P0_L1_")].sel(lat_0=y0, lon_0=x0,method='nearest')
+
+    print(lm.max(),lm.min())
+    print(sm.max(),sm.min())
+    print(snow.max(),snow.min())
+    print(ice.max(),ice.min())
 
     # surface temp 
-    sfctemp=gfs.TMP_P0_L1_GLL0.sel(lat_0=y0, lon_0=x0,method='nearest')
+    sfctemp=gfs[find_var(gfs,"TMP_P0_L1_")].sel(lat_0=y0, lon_0=x0,method='nearest')
+
+    print(sfctemp)
 
     # surface type 
     sfctype=xr.DataArray(np.zeros((len(y0),len(x0),6)),dims=[t.dims[1],t.dims[2],'type'],coords=[t.coords['lat_0'],t.coords['lon_0'],np.arange(0,6)])

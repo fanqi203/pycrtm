@@ -62,9 +62,9 @@ def plot(cases, figname):
     ch7_obs=obs.CMI_C13
 
 
-    fsbt="sbt_2021_sbt_regrid.nc" # sbt_2021_regrid.nc" # profiles/sbt_dorian_regrid.nc"
+    fsbt="sbt_2021_regrid.nc" # sbt_2021_regrid.nc" # profiles/sbt_dorian_regrid.nc"
     sbt=xr.open_mfdataset(fsbt,preprocess=preprocessobs,concat_dim="cases",engine='pynio')
-    ch7_sbt=sbt.SBT124_P0_L8_GGA0 # VAR_3_192_58_P0_L8_GGA0 #SBT124_P0_L8_GLC0
+    ch7_sbt=sbt.VAR_3_192_58_P0_L8_GGA0 # VAR_3_192_58_P0_L8_GGA0 #SBT124_P0_L8_GLC0
 
 
     fig, ax = plt.subplots(1, 1)
@@ -90,5 +90,7 @@ def plot(cases, figname):
 
 cases="profile2d4_2019_dorain_gfs_output_test_R_ice*.nc" 
 cases="profile2d4_2021_gfs_EMCUPP_output_test_control.nc"
+cases="profile2d4_2021_gfs_EMCUPP_qv1000_output_test_control.nc"
+#cases="profile2d4_2021_gfs_EMCUPP_qv1000_output_test_control.nc.backup"
 figname="pdf_test_EMC_UPP.png"
 plot(cases,figname)
